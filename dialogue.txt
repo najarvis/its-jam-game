@@ -1,0 +1,17 @@
+[start] 0
+Hello, and welcome to your first day at ITS, the interstellar tech support hotline for the Lemurian Empire
+Have you worked with us before?
+[choice] 1, Yes
+[choice] 2, No
+
+[start] 1
+Great! Then you should be all caught up
+[next] 3
+
+[start] 2
+Oh well welcome! Your dedication will help smooth problems across the entire Lemurian Empire!
+[next] 3
+
+[start] 3
+Please wait for your first call to come in
+[end]
