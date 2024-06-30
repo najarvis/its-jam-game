@@ -9,7 +9,7 @@ Great! Then you should be all caught up
 [next] 3
 
 [start] 2
-Oh well welcome! Your dedication will help smooth problems across the entire Lemurian Empire!
+Oh in that case, welcome! Your dedication will help smooth problems across the entire Lemurian Empire!
 [next] 3
 
 [start] 3
