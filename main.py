@@ -40,15 +40,25 @@ def run():
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if event.button == 1:
                     for program in its_desktop.programs:
-                        program.selected = False
-                        if program.rect.collidepoint(event.pos):
-                            program.selected = True
+                        if program.icon_rect.collidepoint(event.pos):
+                            if program.selected:
+                                program.launch_program()
+                                program.selected = False
+                            else:
+                                program.selected = True
+                        else:
+                            program.selected = False
                     
         # DH.update(delta)
 
         screen.fill((0, 0, 0))
         its_desktop.draw(screen, pygame.Rect(0, 0, *SCREEN_SIZE))
         # DH.draw_text(screen, text_rect)
+
+        for program in its_desktop.programs:
+            if program.open:
+                program.draw_window(screen)
+
 
         pygame.display.flip()
         
