@@ -27,7 +27,7 @@ def run():
     # text_rect = pygame.Rect(margin_x, HEIGHT / 2, WIDTH - (margin_x * 2), HEIGHT / 2 - margin_y)
     
     while not done:
-        delta = clock.tick(60) / 1000.0
+        delta = clock.tick(30) / 1000.0
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -51,12 +51,16 @@ def run():
                     
         # DH.update(delta)
 
+
+
         screen.fill((0, 0, 0))
         its_desktop.draw(screen, pygame.Rect(0, 0, *SCREEN_SIZE))
         # DH.draw_text(screen, text_rect)
 
         for program in its_desktop.programs:
-            if program.open:
+            program.update(delta)
+            program.handle_input()
+            if program.open or program.opening:
                 program.draw_window(screen)
 
 
