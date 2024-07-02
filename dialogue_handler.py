@@ -94,6 +94,6 @@ class DialogueHandler:
     @property
     def current_block(self) -> DialogueBlock:
         return self.dialogue_blocks[self.current_block_id]
-    
+
 if __name__ == "__main__":
     dh = DialogueHandler("dialogue.txt")

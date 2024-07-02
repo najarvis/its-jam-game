@@ -1,6 +1,7 @@
 import pygame
 import dialogue_handler
 import desktop
+import program
 
 SCREEN_SIZE = WIDTH, HEIGHT = (640, 480)
 
@@ -17,9 +18,13 @@ def run():
     its_desktop = desktop.Desktop(pygame.Rect(0, 0, *SCREEN_SIZE))
 
     chat_support_icon = pygame.image.load("res/imgs/ChatIcon.png").convert_alpha()
-    chat_program = desktop.ChatSupport(chat_support_icon)
+    chat_program = program.ChatSupport(chat_support_icon)
+
+    laser_program_icon = pygame.image.load("res/imgs/LaserIcon.png").convert_alpha()
+    laser_program = program.LaserCommand(laser_program_icon)
 
     its_desktop.programs.append(chat_program)
+    its_desktop.programs.append(laser_program)
 
     # DH = dialogue_handler.DialogueHandler("dialogue.txt")
     # margin_x = 20
@@ -39,29 +44,30 @@ def run():
 
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if event.button == 1:
-                    for program in its_desktop.programs:
-                        if program.icon_rect.collidepoint(event.pos):
-                            if program.selected:
-                                program.launch_program()
-                                program.selected = False
+                    its_desktop.detect_window_click(event.pos)
+                    for cur_program in its_desktop.programs:
+                        if not cur_program.open and not cur_program.opening and cur_program.icon_rect.collidepoint(event.pos):
+                            if cur_program.selected:
+                                cur_program.launch_program()
+                                cur_program.selected = False
                             else:
-                                program.selected = True
+                                cur_program.selected = True
                         else:
-                            program.selected = False
+                            cur_program.selected = False
                     
         # DH.update(delta)
 
-
+        its_desktop.update(delta)
 
         screen.fill((0, 0, 0))
         its_desktop.draw(screen, pygame.Rect(0, 0, *SCREEN_SIZE))
         # DH.draw_text(screen, text_rect)
 
-        for program in its_desktop.programs:
-            program.update(delta)
-            program.handle_input()
-            if program.open or program.opening:
-                program.draw_window(screen)
+        for cur_program in its_desktop.programs:
+            #cur_program.update(delta)
+            cur_program.handle_input()
+            if cur_program.open or cur_program.opening or cur_program.closing:
+                cur_program.draw_window(screen)
 
 
         pygame.display.flip()
