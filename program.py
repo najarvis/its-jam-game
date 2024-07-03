@@ -1,6 +1,8 @@
 import math
+import random
 import pygame
 import window
+import dialogue_handler
 
 class Program:
     """A program is something that is launchable and has an icon that lives on the desktop"""
@@ -92,4 +94,39 @@ class ChatSupport(Program):
 class LaserCommand(Program):
 
     def __init__(self, icon: pygame.Surface):
-        Program.__init__(self, icon, pygame.Vector2(20, 100), "Laser Command", pygame.Vector2(300, 200))
+        Program.__init__(self, icon, pygame.Vector2(20, 100), "Laser Command", pygame.Vector2(300, 400))
+        self.asteroid_position = pygame.Vector2(random.randint(0, int(self.window.size.x)), 0)
+        self.asteroid_goal = pygame.Vector2(random.randint(int(self.window.size.x * 0.25), int(self.window.size.x * 0.75)), self.window.size.y)
+
+        self.asteroid_speed = 50
+
+        self.alive = True
+        self.game_window = pygame.Surface(self.window.content_rect.size)
+
+    @staticmethod
+    def draw_reticle(surface: pygame.Surface, location: pygame.Vector2):
+        reticle_scale = 15
+        corner_angle = math.radians(30)
+        corner_offset = math.radians(120)
+        corner_1 = pygame.Vector2(math.cos(corner_angle), math.sin(corner_angle)) * reticle_scale + location
+        corner_2 = pygame.Vector2(math.cos(corner_angle + corner_offset), math.sin(corner_angle + corner_offset)) * reticle_scale + location
+        corner_3 = pygame.Vector2(math.cos(corner_angle - corner_offset), math.sin(corner_angle - corner_offset)) * reticle_scale + location
+
+        pygame.draw.polygon(surface, (220, 30, 30), [corner_1, corner_2, corner_3], 3)
+
+
+    def update(self, delta: float):
+        Program.update(self, delta)
+        if self.open:
+            self.asteroid_position += (self.asteroid_goal - self.asteroid_position).normalize() * self.asteroid_speed * delta
+
+    def draw_window(self, surface: pygame.Surface):
+        Program.draw_window(self, surface)
+
+        if self.open:
+            self.game_window.fill((0, 0, 0))
+
+            pygame.draw.circle(self.game_window, pygame.colordict.THECOLORS['burlywood4'], self.asteroid_position, 25)
+            LaserCommand.draw_reticle(self.game_window, pygame.Vector2(pygame.mouse.get_pos()) - pygame.Vector2(self.window.content_rect.topleft))
+
+            surface.blit(self.game_window, self.window.content_rect)

@@ -1,5 +1,4 @@
 import pygame
-import dialogue_handler
 import desktop
 import program
 
@@ -25,11 +24,6 @@ def run():
 
     its_desktop.programs.append(chat_program)
     its_desktop.programs.append(laser_program)
-
-    # DH = dialogue_handler.DialogueHandler("dialogue.txt")
-    # margin_x = 20
-    # margin_y = 10
-    # text_rect = pygame.Rect(margin_x, HEIGHT / 2, WIDTH - (margin_x * 2), HEIGHT / 2 - margin_y)
     
     while not done:
         delta = clock.tick(30) / 1000.0
@@ -55,21 +49,11 @@ def run():
                         else:
                             cur_program.selected = False
                     
-        # DH.update(delta)
-
         its_desktop.update(delta)
 
         screen.fill((0, 0, 0))
         its_desktop.draw(screen, pygame.Rect(0, 0, *SCREEN_SIZE))
-        # DH.draw_text(screen, text_rect)
-
-        for cur_program in its_desktop.programs:
-            #cur_program.update(delta)
-            cur_program.handle_input()
-            if cur_program.open or cur_program.opening or cur_program.closing:
-                cur_program.draw_window(screen)
-
-
+        
         pygame.display.flip()
         
     pygame.quit()

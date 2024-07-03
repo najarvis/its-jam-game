@@ -21,6 +21,9 @@ class Window:
         self.title_bar_text = self.font.render(self.title, True, (0, 0, 0))
         self.title_bar_text_rect = self.title_bar_text.get_rect(center = self.title_bar_rect.center)
 
+        self.content_rect = pygame.rect.Rect(self.position.x, self.position.y + Window.title_bar_height,
+                                             self.size.x, self.size.y - Window.title_bar_height)
+
         self.close_rect = pygame.rect.Rect(pygame.Vector2(self.title_bar_rect.right - Window.title_bar_height * 0.75,
                                                           self.title_bar_rect.top + Window.title_bar_height // 4),
                                            pygame.Vector2(Window.title_bar_height // 2, 
@@ -46,6 +49,9 @@ class Window:
                                                           self.title_bar_rect.top + Window.title_bar_height // 4),
                                            pygame.Vector2(Window.title_bar_height // 2, 
                                                           Window.title_bar_height // 2))
+                                                          
+        self.content_rect = pygame.rect.Rect(self.position.x, self.position.y + Window.title_bar_height,
+                                             self.size.x, self.size.y - Window.title_bar_height)
 
     def draw(self, surface: pygame.Surface):
         title_color = (240, 240, 240)

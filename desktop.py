@@ -29,6 +29,12 @@ class Desktop:
 
         surface.blit(self.desktop_image, draw_rect)
 
+        for cur_program in self.programs:
+            #cur_program.update(delta)
+            cur_program.handle_input()
+            if cur_program.open or cur_program.opening or cur_program.closing:
+                cur_program.draw_window(surface)
+
     def update(self, delta: float):
         self.was_mouse_held = self.mouse_held
         self.mouse_held = pygame.mouse.get_pressed()[0]
