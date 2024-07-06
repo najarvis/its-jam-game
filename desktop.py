@@ -9,6 +9,9 @@ class Desktop:
     def __init__(self, desktop_space: pygame.Rect):
         self.programs: list[program.Program] = []
         self.rect = desktop_space
+        self.taskbar_size = 25
+
+        self.taskbar_rect = pygame.rect.FRect(0, self.rect.height - self.taskbar_size, self.rect.width, self.taskbar_size)
 
         self.desktop_image = pygame.Surface(self.rect.size)
 
@@ -30,10 +33,11 @@ class Desktop:
         surface.blit(self.desktop_image, draw_rect)
 
         for cur_program in self.programs:
-            #cur_program.update(delta)
             cur_program.handle_input()
             if cur_program.open or cur_program.opening or cur_program.closing:
                 cur_program.draw_window(surface)
+
+        pygame.draw.rect(self.desktop_image, (200, 200, 200), self.taskbar_rect)
 
     def update(self, delta: float):
         self.was_mouse_held = self.mouse_held

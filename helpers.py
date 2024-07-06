@@ -20,5 +20,13 @@ def bottom_edge_line(rect: pygame.rect.FRect) -> tuple[pygame.Vector2, pygame.Ve
 def random_hue(saturation: float, value: float) -> pygame.Color:
     return pygame.Color.from_hsva(random.uniform(0, 360), saturation, value, 100.0)
 
+def random_bw() -> pygame.Color:
+    c = random.randint(0, 1)
+    return pygame.Color(c * 255, c * 255, c * 255, 255)
+
+def random_gray() -> pygame.Color:
+    c = random.randint(0, 255)
+    return pygame.Color(c, c, c, 255)
+
 def random_vector2(scale: float):
     return pygame.Vector2(random.uniform(-scale, scale), random.uniform(-scale, scale))

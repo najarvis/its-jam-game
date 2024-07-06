@@ -113,12 +113,22 @@ class LaserCommand(Program):
         self.asteroid_goal = pygame.Vector2(random.randint(int(self.window.size.x * 0.25), int(self.window.size.x * 0.75)), self.window.size.y)
 
         self.asteroid_speed = 50
+        self.asteroid_size = 32
+        self.asteroid_image = pygame.image.load("res/imgs/asteroid.png").convert_alpha()
+
+        self.asteroid_rect = self.asteroid_image.get_rect()
+
+        self.exploding = False
+        self.explosion_timer = 0.0
+        self.explosion_length = 5.0
+        self.explosion_surf = pygame.Surface(self.game_window.size, flags=pygame.BLEND_ADD)
+
         self.alive = True
         
         self.setup_done = True
         
         self.asteroid_particles: list[particle.Particle] = []
-        self.particle_interval = 0.1
+        self.particle_interval = 0.05
         self.last_particle_time = 0.0
 
     @staticmethod
@@ -134,44 +144,88 @@ class LaserCommand(Program):
 
 
     def update(self, delta: float):
+        if not self.setup_done:
+            self.setup()
+
         Program.update(self, delta)
         if self.open:
-            if not self.setup_done:
-                self.setup()
                 
-            self.asteroid_position += (self.asteroid_goal - self.asteroid_position).normalize() * self.asteroid_speed * delta
-            
-            if self.last_particle_time + self.particle_interval < self.window.open_timer:
-                self.last_particle_time = self.window.open_timer
-                self.add_asteroid_particle()
+            if self.alive:
+                self.asteroid_position += (self.asteroid_goal - self.asteroid_position).normalize() * self.asteroid_speed * delta
+                self.asteroid_rect.center = self.asteroid_position
+
+                if self.asteroid_position.y > self.game_window.get_rect().height - self.asteroid_size * 1.5:
+                    self.exploding = True
+                    self.explode_time = self.window.open_timer
+                    self.alive = False
+                    for _ in range(50):
+                        self.add_asteroid_particle()
+
+                    for p in self.asteroid_particles:
+                        vec_to_asteroid = (self.asteroid_position - p.position)
+                        p.velocity = (-vec_to_asteroid / vec_to_asteroid.magnitude()) * 100
+                        p.lifetime = self.explosion_length
                 
-            for particle in self.asteroid_particles:
-                particle.update(delta)
+                if self.last_particle_time + self.particle_interval < self.window.open_timer:
+                    self.last_particle_time = self.window.open_timer
+                    self.add_asteroid_particle()
+                
+            for p in self.asteroid_particles:
+                p.update(delta)
+
+            if self.exploding:
+                self.explosion_timer += delta
+                self.exploding = self.explosion_timer < self.explosion_length
+                p = self.add_asteroid_particle()
+                vec_to_asteroid = (self.asteroid_position - p.position)
+                p.velocity = (-vec_to_asteroid / vec_to_asteroid.magnitude()) * 100
+                p.lifetime = self.explosion_length
                 
             self.clean_up_particles()
+
+        if not self.alive and self.opening:
+            self.setup()
             
     def add_asteroid_particle(self):
-        asteroid_velocity = (self.asteroid_goal - self.asteroid_position).normalize() * self.asteroid_speed
-        new_particle = particle.Particle(self.asteroid_position.copy(), helpers.random_vector2(5), 20, lifetime=2.0, colorstart=(200, 100, 20))
+        # asteroid_velocity = (self.asteroid_goal - self.asteroid_position).normalize() * self.asteroid_speed
+        new_particle = particle.Particle(self.asteroid_position.copy() + helpers.random_vector2(8) - pygame.Vector2(0, 8), helpers.random_vector2(5), size_start=12, size_end=25, lifetime=2.0, colorstart=(200, 100, 20))
         self.asteroid_particles.append(new_particle)
+        return new_particle
     
     def clean_up_particles(self):
-        for particle in self.asteroid_particles.copy():
-            if not particle.isalive:
-                self.asteroid_particles.remove(particle)
+        self.asteroid_particles = list(filter(lambda particle: particle.isalive, self.asteroid_particles))
 
     def draw_window(self, surface: pygame.Surface):
         Program.draw_window(self, surface)
 
         if self.open:
-            self.game_window.fill(self.sky_color)
-            
-            pygame.draw.rect(self.game_window, self.ground_color, self.ground_rect)
-            
-            for particle in self.asteroid_particles:
-                particle.draw(self.game_window)
+            if self.alive or self.exploding:
+                # Draw sky
+                self.game_window.fill(self.sky_color)
+                
+                # Draw the ground
+                pygame.draw.rect(self.game_window, self.ground_color, self.ground_rect)
 
-            pygame.draw.circle(self.game_window, pygame.colordict.THECOLORS['burlywood4'], self.asteroid_position, 25)
-            LaserCommand.draw_reticle(self.game_window, pygame.Vector2(pygame.mouse.get_pos()) - pygame.Vector2(self.window.content_rect.topleft))
+                # Draw asteroid particles
+                for particle in self.asteroid_particles:
+                    particle.draw(self.game_window)
 
+                # Draw asteroid
+                self.game_window.blit(self.asteroid_image, self.asteroid_rect)
+                
+                if self.exploding:
+                    explode_ratio = self.explosion_timer / self.explosion_length
+                    pygame.draw.circle(self.game_window, pygame.colordict.THECOLORS['white'], self.asteroid_position, pygame.math.lerp(self.asteroid_size, self.asteroid_size * 5, explode_ratio))
+
+                    self.explosion_surf.fill(helpers.lerp_rgb((0, 0, 0), (255, 255, 255), explode_ratio))
+                    self.game_window.blit(self.explosion_surf, (0, 0), special_flags=pygame.BLEND_ADD)
+
+                else:
+                    # Reticle
+                    LaserCommand.draw_reticle(self.game_window, pygame.Vector2(pygame.mouse.get_pos()) - pygame.Vector2(self.window.content_rect.topleft))
+
+            else:
+                self.window.draw_fuzzy_screen(self.game_window)
+
+            # Draw the final window onto the screen
             surface.blit(self.game_window, self.window.content_rect)

@@ -35,6 +35,9 @@ class Window:
         self.focused = False
         
         self.open_timer = 0.0
+        self.fuzzy_interval = 0.25
+        self.fuzzy_time = 0.0
+        self.fuzzy_size = 16 # size of fuzzy particles
 
     def get_font(self):
         assert pygame.font.get_init()
@@ -79,6 +82,15 @@ class Window:
 
         if not self.focused:
             surface.blit(self.overlay_image, self.rect)
+
+    def draw_fuzzy_screen(self, surface: pygame.Surface):
+        if self.open_timer - self.fuzzy_time > self.fuzzy_interval:
+            self.fuzzy_time = self.open_timer
+
+            for x in range((self.content_rect.width // self.fuzzy_size) + 1):
+                for y in range((self.content_rect.height // self.fuzzy_size) + 1):
+                    pygame.draw.rect(surface, helpers.random_gray(), (x * self.fuzzy_size, y * self.fuzzy_size, self.fuzzy_size, self.fuzzy_size))
+
 
     def check_close(self, pos: pygame.Vector2) -> bool:
         return self.close_rect.collidepoint(pos) and self.focused
