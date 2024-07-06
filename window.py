@@ -33,6 +33,8 @@ class Window:
         self.overlay_image.set_alpha(40)
         
         self.focused = False
+        
+        self.open_timer = 0.0
 
     def get_font(self):
         assert pygame.font.get_init()
@@ -52,6 +54,8 @@ class Window:
                                                           
         self.content_rect = pygame.rect.Rect(self.position.x, self.position.y + Window.title_bar_height,
                                              self.size.x, self.size.y - Window.title_bar_height)
+        
+        self.open_timer += delta
 
     def draw(self, surface: pygame.Surface):
         title_color = (240, 240, 240)
