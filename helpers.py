@@ -1,3 +1,5 @@
+"""Helper functions that can be used in any file"""
+
 import random
 import pygame
 

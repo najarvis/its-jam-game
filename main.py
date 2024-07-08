@@ -8,7 +8,7 @@ def run():
     pygame.init()
     pygame.font.init()
     
-    screen = pygame.display.set_mode(SCREEN_SIZE)
+    screen = pygame.display.set_mode(SCREEN_SIZE, pygame.SCALED)
     pygame.display.set_caption("Interstellar Tech Support")
     
     done = False
@@ -26,6 +26,7 @@ def run():
     its_desktop.programs.append(laser_program)
     
     while not done:
+        # 30 FPS to give a more old school feel
         delta = clock.tick(30) / 1000.0
 
         for event in pygame.event.get():
@@ -38,7 +39,11 @@ def run():
 
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if event.button == 1:
+                    # Handle ordering of windows
                     its_desktop.detect_window_click(event.pos)
+                    
+                    # Check if we are clicking on an icon for any of the programs.
+                    # NOTE: We can currently open a program if the icon is behind the window
                     for cur_program in its_desktop.programs:
                         if not cur_program.open and not cur_program.opening and cur_program.icon_rect.collidepoint(event.pos):
                             if cur_program.selected:

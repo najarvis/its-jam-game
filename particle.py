@@ -2,6 +2,7 @@ import pygame
 import helpers
 
 class Particle:
+    """Basic circular particle that starts in a location, moves with a given velocity, and changes size and color over its lifetime"""
     
     def __init__(self, position: pygame.Vector2, velocity: pygame.Vector2, size_start: float, size_end: float, lifetime=1.0, colorstart=(255, 255, 255), colorend=(0, 0, 0)):
         self.position = position

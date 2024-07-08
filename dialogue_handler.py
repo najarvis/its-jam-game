@@ -19,6 +19,7 @@ class DialogueBlock:
 
     def __repr__(self):
         return f"DialogueBlock <ID: {self.id}, lines: {self.lines}, next: {self.next}, choices: {self.choices}>"
+    
 class DialogueHandler:
     
     font_size = 25
@@ -85,6 +86,7 @@ class DialogueHandler:
         pass
     
     def draw_text(self, surface: pygame.Surface, text_rect: pygame.Rect):
+        """Draws the current dialogue block"""
         pygame.draw.rect(surface, (255, 0, 0), text_rect, 2)
 
         current_text = self.current_block.lines[self.current_block_id]
