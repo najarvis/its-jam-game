@@ -137,9 +137,11 @@ class LaserCommand(Program):
         self.asteroid_speed = 25
         self.asteroid_image = pygame.image.load("res/imgs/asteroid.png").convert_alpha()
         self.asteroid_size = self.asteroid_image.get_width() / 2
+        self.asteroid_destroyed = False
 
         self.asteroid_rect = self.asteroid_image.get_rect()
         self.asteroid_mask = pygame.mask.from_surface(self.asteroid_image)
+        self.asteroid_mask_max = self.asteroid_mask.count()
 
         self.exploding = False
         self.explosion_timer = 0.0
@@ -208,7 +210,7 @@ class LaserCommand(Program):
         if self.open:
             
             # Asteroid only moves and creates a trail if it hasn't impacted
-            if self.alive:
+            if self.alive and not self.asteroid_destroyed:
                 self.asteroid_position += (self.asteroid_goal - self.asteroid_position).normalize() * self.asteroid_speed * delta
                 self.asteroid_rect.center = self.asteroid_position
 
@@ -229,7 +231,7 @@ class LaserCommand(Program):
                         p.lifetime = self.explosion_length
                 
                 # Add new particles every `particle_intervial` seconds
-                if self.last_particle_time + self.particle_interval < self.window.open_timer:
+                if self.last_particle_time + (self.particle_interval / self.check_asteroid_percentage()) < self.window.open_timer:
                     self.last_particle_time = self.window.open_timer
                     self.add_asteroid_particle()
                 
@@ -257,7 +259,7 @@ class LaserCommand(Program):
             
     def add_asteroid_particle(self):
         # Create and return a new particle moving away from the asteroid
-        new_particle = particle.Particle(self.asteroid_position.copy() + helpers.random_vector2(8) - pygame.Vector2(0, 8), helpers.random_vector2(5), size_start=12, size_end=25, lifetime=2.0, colorstart=(200, 100, 20))
+        new_particle = particle.Particle(self.asteroid_position.copy() + helpers.random_vector2(8) - pygame.Vector2(0, 8), helpers.random_vector2(5), size_start=5, size_end=25, lifetime=2.0, colorstart=(200, 100, 20))
         self.asteroid_particles.append(new_particle)
         return new_particle
     
@@ -295,12 +297,22 @@ class LaserCommand(Program):
         
         # Remove the smallest chunk of the asteroid if two parts get separated
         self.asteroid_mask = self.asteroid_mask.connected_component()
+
+        # Check if we've fully destroyed the asteroid
+        self.asteroid_destroyed = self.check_asteroid_destroyed()
         
     def check_asteroid_laser_collision(self):
-        return (self.asteroid_position - self.laser_target).magnitude() < self.asteroid_size
+        laser_explosion_topleft = self.laser_target - pygame.Vector2(self.laser_explosion_mask.get_size()) / 2
+        asteroid_topleft = pygame.Vector2(self.asteroid_rect.topleft)
+        offset = laser_explosion_topleft - asteroid_topleft
+        return self.asteroid_mask.overlap(self.laser_explosion_mask, offset) is not None
+        # return (self.asteroid_position - self.laser_target).magnitude() < self.asteroid_size
     
+    def check_asteroid_percentage(self):
+        return self.asteroid_mask.count() / self.asteroid_mask_max
+
     def check_asteroid_destroyed(self):
-        return self.asteroid_mask.count() < 5
+        return self.check_asteroid_percentage() < 0.05
 
     def draw_asteroid(self):
         return self.asteroid_mask.to_surface(None, self.asteroid_image, None, None, (0, 0, 0, 0))
